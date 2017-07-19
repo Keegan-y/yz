@@ -9,7 +9,7 @@ namespace SignalCaculator {
 		std::function<Return(Param1, Param2, Param3)> task_;
 	public:
 		ComputeBO(const std::string& algorithm, int param, const std::function<Return(Param1, Param2, Param3)>& task);
-		void compute(std::vector<int> &endPos, std::string &line, std::ofstream & ofs, std::string &curTimeStamp);
+		void compute(std::vector<size_t> &endPos, std::string &line, std::ofstream & ofs, std::string &curTimeStamp);
 	};
 
 	template<class Return, class Param1, class Param2, class Param3>
@@ -21,7 +21,7 @@ namespace SignalCaculator {
 	}
 
 	template<class Return, class Param1, class Param2, class Param3>
-	inline void ComputeBO< Return,  Param1,  Param2,  Param3>::compute(std::vector<int>& endPos, std::string & line, std::ofstream& ofs, std::string & curTimeStamp)
+	inline void ComputeBO< Return,  Param1,  Param2,  Param3>::compute(std::vector<size_t>& endPos, std::string & line, std::ofstream& ofs, std::string & curTimeStamp)
 	{
 		using namespace std;
 
@@ -68,7 +68,7 @@ namespace SignalCaculator {
 
 			double result = curDiff;
 			if (!acc_.empty()) {
-				auto ref = acc_.front();
+				auto& ref = acc_.front();
 				if (curTSMilis - ref.first == timeRange) {
 					result -= ref.second;
 				}

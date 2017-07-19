@@ -9,7 +9,7 @@ namespace SignalCaculator {
 		std::function<Return(Param1, Param2)> task_;
 	public:
 		ComputeBV(const std::string& algorithm, const std::function<Return(Param1, Param2)>& task);
-		void compute(std::vector<int> &endPos, std::string &line, std::ofstream& ofs ,std::string &curTimeStamp );
+		void compute(std::vector<size_t> &endPos, std::string &line, std::ofstream& ofs ,std::string &curTimeStamp );
 	};
 
 	template<class Return, class Param1, class Param2>
@@ -21,7 +21,7 @@ namespace SignalCaculator {
 	}
 
 	template<class Return, class Param1, class Param2>
-	inline void ComputeBV<Return, Param1, Param2>:: compute(std::vector<int> &endPos, std::string &line, std::ofstream& ofs, std::string &curTimeStamp)
+	inline void ComputeBV<Return, Param1, Param2>:: compute(std::vector<size_t> &endPos, std::string &line, std::ofstream& ofs, std::string &curTimeStamp)
 	{
 		using namespace std;
 		string bidVol1 = getField(endPos, RecordFields::BIDVOL1, line);

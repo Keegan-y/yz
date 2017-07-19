@@ -1,6 +1,5 @@
 #include <fstream>
 #include <iostream>
-#include <string>
 #include <vector>
 #include <assert.h>
 #include <deque>
@@ -12,23 +11,22 @@ using namespace std;
 using SignalCaculator::RecordFields;
 
 namespace SignalCaculator {
-	vector<int> getEndPos(const string& line) {
+	vector<size_t> getEndPos(const string& line) {
 		//size of line is checked when processing begin
 		//so is line[0] != ','. of course line[0] is not valid input which means input file is broken.
 		assert(line[0] != ',');
-		vector<int> endPos;
-		int len = static_cast<int>(line.size());
-		for (int i = 1; i < len; i++) {
+		vector<size_t> endPos;
+		for (size_t i = 1; i < line.size(); i++) {
 			if (line[i] == ',') {
 				endPos.push_back(i);
 			}
 		}
-		endPos.push_back(static_cast<int>(line.size()));
+		endPos.push_back(line.size());
 		return endPos;
 	}
 
 	//since not every field is needed, I won't parse the whole string to one object
-	string getField(const vector<int>& endPos, int index, const string& line) {
+	string getField(const vector<size_t>& endPos, int index, const string& line) {
 		int len = static_cast<int>(endPos.size());
 		assert((index >= 0 && index < len));
 		if (index == 0) {
@@ -98,11 +96,11 @@ namespace SignalCaculator {
 		return  result;
 	}
 
-	int timeDiff(const string& prev, const string& cur) {
-		int p = strToMillisecond(prev);
-		int c = strToMillisecond(cur);
-		return c - p;
-	}
+//	int timeDiff(const string& prev, const string& cur) {
+//		int p = strToMillisecond(prev);
+//		int c = strToMillisecond(cur);
+//		return c - p;
+//	}
 
 	int timeDiff(int prev, int cur) {
 		return cur - prev;
@@ -199,7 +197,7 @@ namespace SignalCaculator {
 			checkRecord(line);
 
 			//this is for retrieving fields easily
-			vector<int> endPos = getEndPos(line);
+			vector<size_t> endPos = getEndPos(line);
 
 			//time stamp for now:
 			string curTimeStamp = getTimeStampStr(line);
@@ -221,34 +219,34 @@ namespace SignalCaculator {
 		return 0;
 	}
 
-	void ComputeSignal::computeBOAVG(std::vector<int> &endPos, std::string &line, int &curTSMilis, std::deque<std::pair<int, double>> &acc, double &accSum, std::ofstream &ofs, std::string &curTimeStamp, int timeRange)
-	{
-		{
-			string askPrice1 = getField(endPos, RecordFields::ASKPRICE1, line);
-			string bidPrice1 = getField(endPos, RecordFields::BIDPRICE1, line);
-			double ap1 = stod(askPrice1);
-			double bp1 = stod(bidPrice1);
-			double curDiff = ap1 - bp1;
-
-			//if any record is not within the recent 5s, remove it
-			removeOldRecords(curTSMilis, timeRange, acc, accSum);
-
-			//caculate the aver
-			//double aver = 0;
-			//for (auto& item : acc) {
-			//	aver += item.second;
-			//}
-
-			double result = curDiff;
-			if (!acc.empty()) {
-				result += accSum / static_cast<double>(acc.size());
-			}
-
-			acc.push_back(make_pair(curTSMilis, curDiff));
-			accSum += curDiff;
-			ofs << curTimeStamp << " rb_bo_5_AVG " << result << endl;
-		}
-	}
+//	void ComputeSignal::computeBOAVG(std::vector<int> &endPos, std::string &line, int &curTSMilis, std::deque<std::pair<int, double>> &acc, double &accSum, std::ofstream &ofs, std::string &curTimeStamp, int timeRange)
+//	{
+//		{
+//			string askPrice1 = getField(endPos, RecordFields::ASKPRICE1, line);
+//			string bidPrice1 = getField(endPos, RecordFields::BIDPRICE1, line);
+//			double ap1 = stod(askPrice1);
+//			double bp1 = stod(bidPrice1);
+//			double curDiff = ap1 - bp1;
+//
+//			//if any record is not within the recent 5s, remove it
+//			removeOldRecords(curTSMilis, timeRange, acc, accSum);
+//
+//			//caculate the aver
+//			//double aver = 0;
+//			//for (auto& item : acc) {
+//			//	aver += item.second;
+//			//}
+//
+//			double result = curDiff;
+//			if (!acc.empty()) {
+//				result += accSum / static_cast<double>(acc.size());
+//			}
+//
+//			acc.push_back(make_pair(curTSMilis, curDiff));
+//			accSum += curDiff;
+//			ofs << curTimeStamp << " rb_bo_5_AVG " << result << endl;
+//		}
+//	}
 
 	ComputeSignal::ComputeSignal(const std::string & inputFileName, const std::string & outputFileName)
 		: inFile_(inputFileName)

@@ -5,51 +5,51 @@
 #include <deque>
 #include <functional>
 namespace SignalCaculator {
-	struct Record {
-		/*½»Ò×ÈÕ, 0
-		ºÏÔ¼´úÂë,
-		½»Ò×Ëù´úÂë,
-		ºÏÔ¼ÔÚ½»Ò×ËùµÄ´úÂë,
-		×îĞÂ¼Û,
-		ÉÏ´Î½áËã¼Û, 5
-		×òÊÕÅÌ,
-		×ò³Ö²ÖÁ¿,
-		½ñ¿ªÅÌ,
-		×î¸ß¼Û,
-		×îµÍ¼Û, 10
-		ÊıÁ¿,
-		³É½»½ğ¶î,
-		³Ö²ÖÁ¿,
-		½ñÊÕÅÌ,
-		±¾´Î½áËã¼Û, 15
-		ÕÇÍ£°å¼Û,
-		µøÍ£°å¼Û,
-		×òĞéÊµ¶È,
-		½ñĞéÊµ¶È,
-		×îºóĞŞ¸ÄÊ±¼ä, 20
-		×îºóĞŞ¸ÄºÁÃë,
-		ÉêÂò¼ÛÒ»,
-		ÉêÂòÁ¿Ò»,
-		ÉêÂô¼ÛÒ»,
-		ÉêÂôÁ¿Ò», 25
-		ÉêÂò¼Û¶ş,
-		ÉêÂòÁ¿¶ş,
-		ÉêÂô¼Û¶ş,
-		ÉêÂôÁ¿¶ş,
-		ÉêÂò¼ÛÈı, 30
-		ÉêÂòÁ¿Èı,
-		ÉêÂô¼ÛÈı,
-		ÉêÂôÁ¿Èı,
-		ÉêÂò¼ÛËÄ,
-		ÉêÂòÁ¿ËÄ, 35
-		ÉêÂô¼ÛËÄ,
-		ÉêÂôÁ¿ËÄ,
-		ÉêÂò¼ÛÎå,
-		ÉêÂòÁ¿Îå,
-		ÉêÂô¼ÛÎå, 40
-		ÉêÂôÁ¿Îå,
-		µ±ÈÕ¾ù¼Û,
-		ÒµÎñÈÕÆÚ
+//	struct Record {
+		/*ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, 0
+		ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½,
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,
+		ï¿½ï¿½Ô¼ï¿½Ú½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä´ï¿½ï¿½ï¿½,
+		ï¿½ï¿½ï¿½Â¼ï¿½,
+		ï¿½Ï´Î½ï¿½ï¿½ï¿½ï¿½, 5
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,
+		ï¿½ï¿½Ö²ï¿½ï¿½ï¿½,
+		ï¿½ï¿½ï¿½ï¿½,
+		ï¿½ï¿½ß¼ï¿½,
+		ï¿½ï¿½Í¼ï¿½, 10
+		ï¿½ï¿½ï¿½ï¿½,
+		ï¿½É½ï¿½ï¿½ï¿½ï¿½,
+		ï¿½Ö²ï¿½ï¿½ï¿½,
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,
+		ï¿½ï¿½ï¿½Î½ï¿½ï¿½ï¿½ï¿½, 15
+		ï¿½ï¿½Í£ï¿½ï¿½ï¿½,
+		ï¿½ï¿½Í£ï¿½ï¿½ï¿½,
+		ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½,
+		ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½,
+		ï¿½ï¿½ï¿½ï¿½Ş¸ï¿½Ê±ï¿½ï¿½, 20
+		ï¿½ï¿½ï¿½ï¿½Ş¸Äºï¿½ï¿½ï¿½,
+		ï¿½ï¿½ï¿½ï¿½ï¿½Ò»,
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»,
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»,
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò», 25
+		ï¿½ï¿½ï¿½ï¿½Û¶ï¿½,
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,
+		ï¿½ï¿½ï¿½ï¿½ï¿½Û¶ï¿½,
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, 30
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, 35
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, 40
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,
+		ï¿½ï¿½ï¿½Õ¾ï¿½ï¿½ï¿½,
+		Òµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		*/
 		//std::string tradingDay;
 		//std::string contractNumber;
@@ -58,7 +58,7 @@ namespace SignalCaculator {
 		//double latestPrice;
 
 
-	};
+//	};
 
 	enum RecordFields
 	{
@@ -73,14 +73,14 @@ namespace SignalCaculator {
 	//this is a value object. it's ok to copy object.
 	class ComputeSignal {
 	public:
-		using Callable = std::function<void(std::vector<int> &endPos, std::string &line, std::ofstream &ofs, std::string &curTimeStamp)>;
+		using Callable = std::function<void(std::vector<size_t> &endPos, std::string &line, std::ofstream &ofs, std::string &curTimeStamp)>;
 		ComputeSignal(const std::string& inputFileName, const std::string& outputFileName);
 		ComputeSignal() = default;
 		void setInputFileName(const std::string& name) { inFile_ = name; }
 		void setOutputFileName(const std::string& name) { outFile_ = name; }
 		//void computeBVDIFF(std::vector<int> &endPos, std::string &line, std::ofstream &ofs, std::string &curTimeStamp);
 		int process();
-		void computeBOAVG(std::vector<int>& endPos, std::string & line, int & curTSMilis, std::deque<std::pair<int, double>>& acc, double & accSum, std::ofstream & ofs, std::string & curTimeStamp, int diff);
+//		void computeBOAVG(std::vector<int>& endPos, std::string & line, int & curTSMilis, std::deque<std::pair<int, double>>& acc, double & accSum, std::ofstream & ofs, std::string & curTimeStamp, int diff);
 		//void computeBOAVG(std::vector<int> &endPos, std::string &line, int &curTSMilis, std::deque<std::pair<int, double>> &acc, double &accSum, std::ofstream &ofs, std::string &curTimeStamp);
 		void addTask(const Callable& c) { tasks_.push_back(c); }
 	private:
@@ -92,12 +92,12 @@ namespace SignalCaculator {
 		//void removeOldRecords(const std::string & cur, int diffMilis, std::deque<std::pair<std::string, double>>& d);
 
 	};
-	std::vector<int> getEndPos(const std::string& line);
-	std::string getField(const std::vector<int>& endPos, int index, const std::string & line);
+	std::vector<size_t> getEndPos(const std::string& line);
+	std::string getField(const std::vector<size_t>& endPos, int index, const std::string & line);
 	std::string getTimeStampStr(const std::string & s);
 	int matchAndExtractNumber(const std::string & s, int index, int lenMax, int factor);
 	int strToMillisecond(const std::string & s);
-	int timeDiff(const std::string & prev, const std::string & cur);
+//	int timeDiff(const std::string & prev, const std::string & cur);
 	int timeDiff(int prev, int cur);
 	std::vector<std::string> readLinesFromFile(std::ifstream & ifs);
 	void sortToTimeStampAscending(std::vector<std::string>& records);
@@ -116,9 +116,9 @@ namespace SignalCaculator {
 	//	void computeBVRATIO(std::vector<int> &endPos, std::string &line, std::string &curTimeStamp);
 	//};
 
-	
 
-	
+
+
 
 	/*
 	rb_bv_DIFF
