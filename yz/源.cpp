@@ -13,7 +13,8 @@ using CodeTest::RecordFields;
 
 vector<int> getEndPos(const string& line) {
 	//size of line is checked when processing begin
-	//so is line[0] != ','
+	//so is line[0] != ','. of course line[0] is not valid input which means input file is broken.
+	assert(line[0] != ',');
 	vector<int> endPos;
 	int len = line.size();
 	for (int i = 1; i < len; i++) {
@@ -24,12 +25,11 @@ vector<int> getEndPos(const string& line) {
 	endPos.push_back(line.size());
 	return endPos;
 }
+
 //since not every field is needed, I won't parse the whole string to one object
-string getField(vector<int>& endPos, int index, string& line) {
+string getField(const vector<int>& endPos, int index, const string& line) {
 	int len = endPos.size();
-	if (!(index >= 0 && index < len)) {
-		cout << "line : " << line << " endPos.size() : " << endPos.size() << " index: " << index << endl;
-	}
+	assert((index >= 0 && index < len));
 	if (index == 0) {
 		return line.substr(0, endPos[0]);
 	}
@@ -62,9 +62,10 @@ string getTimeStampStr(const string& s) {
 	return day + " " + time + "." + msec;
 }
 
-int matchAndExtract(const string& s, int index, int len, int factor) {
+int matchAndExtract(const string& s, int index, int lenMax, int factor) {
 	int number = 0;
-	for (int i = index; i < index + len; i++) {
+	int upper = s.size();
+	for (int i = index; i < index + lenMax && i < upper; i++) {
 		number *= 10;
 		number += s[i] - '0';
 	}
@@ -99,8 +100,49 @@ int strToMili(const string& s) {
 int timeDiff(const string& prev, const string& cur) {
 	int p = strToMili(prev);
 	int c = strToMili(cur);
-	if (p == -1 || c == -1) { return INT_MAX; }
 	return c - p;
+}
+
+vector<string> readLinesFromFile(ifstream& ifs) {
+	vector<string> result;
+	//ignore the first line
+	string line;
+	getline(ifs, line);
+	while (getline(ifs, line)) {
+		result.push_back(line);
+	}
+	return result;
+}
+
+void sortToTimeStampAscending(vector<string>& records) {
+	sort(records.begin(), records.end()
+		, [&](const string& s1, const string& s2) {
+		string timestamp1 = getTimeStampStr(s1);
+		string timestamp2 = getTimeStampStr(s2);
+		return timestamp1 < timestamp2;
+	}
+	);
+}
+
+vector<string> preprocess(ifstream& ifs) {
+	auto records = readLinesFromFile(ifs);
+	cout << "read file into memory" << endl;
+	sortToTimeStampAscending(records);
+	cout << "sort done" << endl;
+	return records;
+}
+
+void checkRecord(const string& line) {
+	//some check on string formats
+	if (line.empty()) {
+		cerr << "read empty line" << endl;
+		exit(-1);
+	}
+	if (line[0] == ',' || *line.rbegin() == ',') {
+		cerr << "invalid data : (begin or end with comma)" << line << endl;
+		exit(-1);
+	}
+	//checking ends here
 }
 
 int processing(const string& inputFile, const string& outputFile) {
@@ -114,51 +156,19 @@ int processing(const string& inputFile, const string& outputFile) {
 		cerr << strerror(errno) << endl;
 		return -1;
 	}
-	//ignore the first line
-	string line;
-	getline(ifs, line);
-	vector<string> timeIncreasingRecords;
-	while (getline(ifs, line)) {
-		timeIncreasingRecords.push_back(line);
-	}
-	cout << "read file into memory" << endl;
-	sort(timeIncreasingRecords.begin(), timeIncreasingRecords.end()
-		, [&](const string& s1, const string& s2) {
-		string timestamp1 = getTimeStampStr(s1);
-		string timestamp2 = getTimeStampStr(s2);
-		return timestamp1 < timestamp2;
-	}
-	);
-	cout << "sort done" << endl;
-	//dump file to save time
-	//ofstream oo("tmp");
-	//ostream_iterator<string> oiter(oo);
-	//copy(timeIncreasingRecords.begin(), timeIncreasingRecords.end(), oiter);
-	//cout << "dumped " << endl;
 
+	vector<string> timeIncreasingRecords = preprocess(ifs);
 
-	////cur line number, not counting the header line
-	//int cnt = 0;
-
-	//recent askprice - bidprice with timestamp as pair.first
+	//<timestamp, askprice - bidprice> of recent 5s
 	deque<pair<string, double>> acc;
 	//probably one optimization to save diff of previous 5s, do it later
 	//askprice - bidprice accumualation 
 	//double accSum = 0;
 
 	for (auto line : timeIncreasingRecords) {
-		//some check on string formats
-		if (line.empty()) {
-			cerr << "read empty line" << endl;
-			return -1;
-		}
-		if (line[0] == ',' || *line.rbegin() == ',') {
-			cerr << "invalid data : (begin or end with comma)" << line << endl;
-			return -1;
-		}
-		//checking ends here
+		checkRecord(line);
 
-		//this is for retrieving fields
+		//this is for retrieving fields easily
 		vector<int> endPos = getEndPos(line);
 
 		//time stamp for now:
@@ -202,18 +212,19 @@ int processing(const string& inputFile, const string& outputFile) {
 			if (!acc.empty()) {
 				result += aver / acc.size();
 			}
-
+			
 			acc.push_back(make_pair(timeStamp, diff));
 			ofs << timeStamp << " rb_bo_5_AVG " << result << endl;
 		}
 	}
 
 	ofs.close();
-	cout << "processing finished" << endl;
+
 	return 0;
 }
 
 int main() {
 	auto ret = processing("ru1705_20161205.csv", "output.txt");
+	cout << "processing finished" << endl;
 	return ret;
 }
