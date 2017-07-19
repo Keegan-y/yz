@@ -178,12 +178,12 @@ namespace SignalCaculator {
 	int ComputeSignal::process() {
 		ifstream ifs(inFile_);
 		if (ifs.fail()) {
-			cerr << strerror(errno) << endl;
+			cerr << "can't open file (" << inFile_ << " to read )" << strerror(errno) << endl;
 			return -1;
 		}
 		ofstream ofs(outFile_);
 		if (ofs.fail()) {
-			cerr << strerror(errno) << endl;
+			cerr << "can't open file (" << outFile_ << " to write )" << strerror(errno) << endl;
 			return -1;
 		}
 

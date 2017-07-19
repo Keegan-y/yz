@@ -70,10 +70,14 @@ namespace SignalCaculator {
 		ASKVOL1 = 25
 	};
 
+	//this is a value object. it's ok to copy object.
 	class ComputeSignal {
 	public:
 		using Callable = std::function<void(std::vector<int> &endPos, std::string &line, std::ofstream &ofs, std::string &curTimeStamp)>;
 		ComputeSignal(const std::string& inputFileName, const std::string& outputFileName);
+		ComputeSignal() = default;
+		void setInputFileName(const std::string& name) { inFile_ = name; }
+		void setOutputFileName(const std::string& name) { outFile_ = name; }
 		//void computeBVDIFF(std::vector<int> &endPos, std::string &line, std::ofstream &ofs, std::string &curTimeStamp);
 		int process();
 		void computeBOAVG(std::vector<int>& endPos, std::string & line, int & curTSMilis, std::deque<std::pair<int, double>>& acc, double & accSum, std::ofstream & ofs, std::string & curTimeStamp, int diff);
