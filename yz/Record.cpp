@@ -11,7 +11,7 @@ using namespace std;
 using SignalCaculator::RecordFields;
 
 namespace SignalCaculator {
-	vector<int> ComputeSignal::getEndPos(const string& line) {
+	vector<int> getEndPos(const string& line) {
 		//size of line is checked when processing begin
 		//so is line[0] != ','. of course line[0] is not valid input which means input file is broken.
 		assert(line[0] != ',');
@@ -27,7 +27,7 @@ namespace SignalCaculator {
 	}
 
 	//since not every field is needed, I won't parse the whole string to one object
-	string ComputeSignal::getField(const vector<int>& endPos, int index, const string& line) {
+	string getField(const vector<int>& endPos, int index, const string& line) {
 		int len = endPos.size();
 		assert((index >= 0 && index < len));
 		if (index == 0) {
@@ -37,7 +37,7 @@ namespace SignalCaculator {
 		return line.substr(endPos[index - 1] + 1, endPos[index] - endPos[index - 1] - 1);
 	}
 
-	string ComputeSignal::getTimeStampStr(const string& s) {
+	string getTimeStampStr(const string& s) {
 		//field 0, 20, 21
 		//20161205  20:59:00 500
 		//format to "20161205  20:59:00.500"
@@ -62,7 +62,7 @@ namespace SignalCaculator {
 		return day + " " + time + "." + msec;
 	}
 
-	int ComputeSignal::matchAndExtractNumber(const string& s, int index, int lenMax, int factor) {
+	int matchAndExtractNumber(const string& s, int index, int lenMax, int factor) {
 		int number = 0;
 		int upper = s.size();
 		for (int i = index; i < index + lenMax && i < upper; i++) {
@@ -72,7 +72,7 @@ namespace SignalCaculator {
 		return  number * factor;
 	}
 
-	int ComputeSignal::strToMillisecond(const string& s) {
+	int strToMillisecond(const string& s) {
 		//the format is :
 		//20161205 xx:xx:xx.xxx 21
 		//20161205 xx:xx:xx.x   19
@@ -97,17 +97,17 @@ namespace SignalCaculator {
 		return  result;
 	}
 
-	int ComputeSignal::timeDiff(const string& prev, const string& cur) {
+	int timeDiff(const string& prev, const string& cur) {
 		int p = strToMillisecond(prev);
 		int c = strToMillisecond(cur);
 		return c - p;
 	}
 
-	int ComputeSignal::timeDiff(int prev, int cur) {
+	int timeDiff(int prev, int cur) {
 		return cur - prev;
 	}
 
-	vector<string> ComputeSignal::readLinesFromFile(ifstream& ifs) {
+	vector<string> readLinesFromFile(ifstream& ifs) {
 		vector<string> result;
 		//ignore the first line
 		string line;
@@ -118,7 +118,7 @@ namespace SignalCaculator {
 		return result;
 	}
 
-	void ComputeSignal::sortToTimeStampAscending(vector<string>& records) {
+	void sortToTimeStampAscending(vector<string>& records) {
 		sort(records.begin(), records.end()
 			, [&](const string& s1, const string& s2) {
 			string timestamp1 = getTimeStampStr(s1);
@@ -161,11 +161,11 @@ namespace SignalCaculator {
 	//	}
 	//}
 
-	void ComputeSignal::removeOldRecords(int cur, int diffMilis, deque<pair<int, double>>& d, double& accSum) {
+	void removeOldRecords(int cur, int diffMilis, deque<pair<int, double>>& d, double& accSum) {
 		while (!d.empty()) {
 			auto& ref = d.front();
-			int ts = ref.first;
-			if (timeDiff(ts, cur) > diffMilis) {
+			int prev = ref.first;
+			if (timeDiff(prev, cur) > diffMilis) {
 				accSum -= ref.second;
 				d.pop_front();
 			}
@@ -205,40 +205,13 @@ namespace SignalCaculator {
 			int curTSMilis = strToMillisecond(curTimeStamp);
 
 			//compute rb_bv_diff:
-			{
-				string bidVol1 = getField(endPos, RecordFields::BIDVOL1, line);
-				string askVol1 = getField(endPos, RecordFields::ASKVOL1, line);
-				int bv1 = stoi(bidVol1);
-				int av1 = stoi(askVol1);
-				int result = bv1 - av1;
+			//computeBVDIFF(endPos, line, ofs, curTimeStamp);
 
-				ofs << curTimeStamp << " rb_bv_DIFF " << result << endl;
-			}
 			//compute rb_bo_5_AVG:
-			{
-				string askPrice1 = getField(endPos, RecordFields::ASKPRICE1, line);
-				string bidPrice1 = getField(endPos, RecordFields::BIDPRICE1, line);
-				double ap1 = stod(askPrice1);
-				double bp1 = stod(bidPrice1);
-				double diff = ap1 - bp1;
+			//computeBOAVG(endPos, line, curTSMilis, acc, accSum, ofs, curTimeStamp, 5000);
 
-				//if any record is not within the recent 5s, remove it
-				removeOldRecords(curTSMilis, 5000, acc, accSum);
-
-				//caculate the aver
-				//double aver = 0;
-				//for (auto& item : acc) {
-				//	aver += item.second;
-				//}
-
-				double result = diff;
-				if (!acc.empty()) {
-					result += accSum / acc.size();
-				}
-
-				acc.push_back(make_pair(curTSMilis, diff));
-				accSum += diff;
-				ofs << curTimeStamp << " rb_bo_5_AVG " << result << endl;
+			for (auto& item : tasks_) {
+				item(endPos, line, ofs, curTimeStamp);
 			}
 		}
 
@@ -246,4 +219,74 @@ namespace SignalCaculator {
 
 		return 0;
 	}
+
+	void ComputeSignal::computeBOAVG(std::vector<int> &endPos, std::string &line, int &curTSMilis, std::deque<std::pair<int, double>> &acc, double &accSum, std::ofstream &ofs, std::string &curTimeStamp, int timeRange)
+	{
+		{
+			string askPrice1 = getField(endPos, RecordFields::ASKPRICE1, line);
+			string bidPrice1 = getField(endPos, RecordFields::BIDPRICE1, line);
+			double ap1 = stod(askPrice1);
+			double bp1 = stod(bidPrice1);
+			double curDiff = ap1 - bp1;
+
+			//if any record is not within the recent 5s, remove it
+			removeOldRecords(curTSMilis, timeRange, acc, accSum);
+
+			//caculate the aver
+			//double aver = 0;
+			//for (auto& item : acc) {
+			//	aver += item.second;
+			//}
+
+			double result = curDiff;
+			if (!acc.empty()) {
+				result += accSum / acc.size();
+			}
+
+			acc.push_back(make_pair(curTSMilis, curDiff));
+			accSum += curDiff;
+			ofs << curTimeStamp << " rb_bo_5_AVG " << result << endl;
+		}
+	}
+
+	ComputeSignal::ComputeSignal(const std::string & inputFileName, const std::string & outputFileName)
+		: inFile_(inputFileName)
+		, outFile_(outputFileName) {}
+
+	//void ComputeSignal::computeBVDIFF(std::vector<int> &endPos, std::string &line, std::ofstream &ofs, std::string &curTimeStamp)
+	//{
+	//	{
+	//		string bidVol1 = getField(endPos, RecordFields::BIDVOL1, line);
+	//		string askVol1 = getField(endPos, RecordFields::ASKVOL1, line);
+	//		int bv1 = stoi(bidVol1);
+	//		int av1 = stoi(askVol1);
+	//		int result = bv1 - av1;
+
+	//		ofs << curTimeStamp << " rb_bv_DIFF " << result << endl;
+	//	}
+	//}
+	/*ComputeBVDIFF::ComputeBVDIFF(ofstream & ofs) :ofs_(ofs) {}
+	void ComputeBVDIFF::computeBVDIFF(std::vector<int>& endPos, std::string & line, std::string & curTimeStamp)
+	{
+		string bidVol1 = getField(endPos, RecordFields::BIDVOL1, line);
+		string askVol1 = getField(endPos, RecordFields::ASKVOL1, line);
+		int bv1 = stoi(bidVol1);
+		int av1 = stoi(askVol1);
+		int result = bv1 - av1;
+
+		ofs_ << curTimeStamp << " rb_bv_DIFF " << result << endl;
+	}
+	ComputeBVRATIO::ComputeBVRATIO(ofstream & ofs) :ofs_(ofs)
+	{
+	}
+	void ComputeBVRATIO::computeBVRATIO(std::vector<int>& endPos, std::string & line, std::string & curTimeStamp)
+	{
+		string bidVol1 = getField(endPos, RecordFields::BIDVOL1, line);
+		string askVol1 = getField(endPos, RecordFields::ASKVOL1, line);
+		int bv1 = stoi(bidVol1);
+		int av1 = stoi(askVol1);
+		double result = log(1.0*bv1 / av1);
+
+		ofs_ << curTimeStamp << " rb_bv_RATIO " << result << endl;
+	}*/
 }
