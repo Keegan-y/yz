@@ -145,6 +145,17 @@ void checkRecord(const string& line) {
 	//checking ends here
 }
 
+void removeOldRecords(const string& cur, int diffMilis, deque<pair<string, double>>& d) {
+	while (!d.empty()) {
+		string& ts = d.front().first;
+		if (timeDiff(ts, cur) > diffMilis) {
+			d.pop_front();
+		}
+		else {
+			break;
+		}
+	}
+}
 int processing(const string& inputFile, const string& outputFile) {
 	ifstream ifs(inputFile);
 	if (ifs.fail()) {
@@ -193,15 +204,8 @@ int processing(const string& inputFile, const string& outputFile) {
 			double diff = ap1 - bp1;
 
 			//if any record is not within the recent 5s, remove it
-			while (!acc.empty()) {
-				string& ts = acc.front().first;
-				if (timeDiff(ts, timeStamp) > 5000) {
-					acc.pop_front();
-				}
-				else {
-					break;
-				}
-			}
+			removeOldRecords(timeStamp, 5000, acc);
+
 			//caculate the aver
 			double aver = 0;
 			for (auto& item : acc) {
@@ -209,7 +213,7 @@ int processing(const string& inputFile, const string& outputFile) {
 			}
 
 			double result = diff;
-			if (!acc.empty()) {
+			if (aver != 0) {
 				result += aver / acc.size();
 			}
 			
