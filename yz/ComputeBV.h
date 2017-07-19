@@ -33,11 +33,10 @@ namespace SignalCaculator {
 		ofs << curTimeStamp << " " << algorithm_ << " " << result << endl;
 	}
 
-
 	double ratio(const std::string& bidVol1, const std::string& askVol1) {
 		int bv1 = stoi(bidVol1);
 		int av1 = stoi(askVol1);
-		double result = log(1.0 * bv1 / av1);
+		double result = log2(1.0 * bv1 / av1);
 		return result;
 	}
 

@@ -56,4 +56,26 @@ namespace SignalCaculator {
 			return result;
 		}
 	};
+
+	class SHIFTCaculator {
+		std::deque<std::pair<int, double>> acc_;
+	public:
+		double shift(int curTSMilis, int timeRange, double curDiff) {
+			using namespace std;
+			//if any record is not within the recent 5s, remove it
+			double dummy;
+			removeOldRecords(curTSMilis, timeRange, acc_, dummy);
+
+			double result = curDiff;
+			if (!acc_.empty()) {
+				auto ref = acc_.front();
+				if (curTSMilis - ref.first == timeRange) {
+					result -= ref.second;
+				}
+			}
+
+			acc_.push_back(make_pair(curTSMilis, curDiff));
+			return result;
+		}
+	};
 }
