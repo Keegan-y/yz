@@ -2,7 +2,7 @@
 #include <iterator>
 #include <unordered_map>
 #include <iostream>
-//#include <dirent>
+#include <dirent.h>
 #include "Helper.h"
 #include "ComputeBO.h"
 #include "ComputeBV.h"
@@ -20,16 +20,20 @@ namespace SignalCaculator {
 	}
 
 	//this is platform dependent
-	vector<string> listDir(const string& dir) {
-		//dirp = opendir(dir.c_str());
-		//while ((dp = readdir(dirp)) != NULL)
-		//	if (dp->d_namlen == len && !strcmp(dp->d_name, name)) {
-		//		(void)closedir(dirp);
-		//		return FOUND;
-		//	}
-		//(void)closedir(dirp);
-		//return NOT_FOUND;
-		return vector<string>{"ru1705_20161205.csv", "rb1705_20161205.csv", "cu1703_20161205.csv", "al1702_20161205.csv", "al1703_20161205.csv"};
+	vector<string> listDir(const string& str) {
+//		return vector<string>{"ru1705_20161205.csv", "rb1705_20161205.csv", "cu1703_20161205.csv", "al1702_20161205.csv", "al1703_20161205.csv"};
+		DIR* dir = opendir(str.c_str());
+        if(dir == nullptr){
+            perror("opendir");
+            exit(-1);
+        }
+        vector<string> result;
+        dirent* entry;
+        while((entry = readdir(dir)) != nullptr){
+            result.push_back(string(entry->d_name));
+        }
+
+        return result;
 	}
 
 	void parseAndAddFunction(const string& signal, ComputeSignal& cs) {
@@ -128,10 +132,10 @@ namespace SignalCaculator {
 	void batch() {
 		ifstream ifs("signals.txt");
 		vector<string> signals;
-		istream_iterator<string> iter(ifs);
-		istream_iterator<string> eof;
+		istream_iterator<string> inputIter(ifs);
+		istream_iterator<string> EOFIter;
 
-		copy(iter, eof, back_inserter(signals));
+		copy(inputIter, EOFIter, back_inserter(signals));
 		if (signals.empty()) { return; }
 
 		//sort(signals.begin(), signals.end());
