@@ -47,7 +47,7 @@ namespace SignalCaculator {
 
 			double result = curDiff;
 			if (!acc_.empty()) {
-				result += accSum_ / static_cast<double>(acc_.size());
+				result -= accSum_ / static_cast<double>(acc_.size());
 			}
 
 			acc_.push_back(make_pair(curTSMilis, curDiff));
