@@ -6,6 +6,7 @@
 #include <deque>
 #include <algorithm>
 #include <iterator>
+#include <cstring>
 #include "Record.h"
 using namespace std;
 using SignalCaculator::RecordFields;
@@ -16,19 +17,19 @@ namespace SignalCaculator {
 		//so is line[0] != ','. of course line[0] is not valid input which means input file is broken.
 		assert(line[0] != ',');
 		vector<int> endPos;
-		int len = line.size();
+		int len = static_cast<int>(line.size());
 		for (int i = 1; i < len; i++) {
 			if (line[i] == ',') {
 				endPos.push_back(i);
 			}
 		}
-		endPos.push_back(line.size());
+		endPos.push_back(static_cast<int>(line.size()));
 		return endPos;
 	}
 
 	//since not every field is needed, I won't parse the whole string to one object
 	string getField(const vector<int>& endPos, int index, const string& line) {
-		int len = endPos.size();
+		int len = static_cast<int>(endPos.size());
 		assert((index >= 0 && index < len));
 		if (index == 0) {
 			return line.substr(0, endPos[0]);
@@ -64,7 +65,7 @@ namespace SignalCaculator {
 
 	int matchAndExtractNumber(const string& s, int index, int lenMax, int factor) {
 		int number = 0;
-		int upper = s.size();
+		int upper = static_cast<int>(s.size());
 		for (int i = index; i < index + lenMax && i < upper; i++) {
 			number *= 10;
 			number += s[i] - '0';
@@ -76,7 +77,7 @@ namespace SignalCaculator {
 		//the format is :
 		//20161205 xx:xx:xx.xxx 21
 		//20161205 xx:xx:xx.x   19
-		int len = s.size();
+		size_t len = s.size();
 		if (len > 21 && len < 19) { cerr << "strToMilis input string length error. input is " << s << endl; exit(-1); }
 		int result = 0;
 		int index = 9;
@@ -192,7 +193,7 @@ namespace SignalCaculator {
 		//<timestamp, askprice - bidprice> of recent 5s
 		deque<pair<int, double>> acc;
 		//askprice - bidprice accumualation 
-		double accSum = 0;
+//		double accSum = 0;
 
 		for (auto line : timeIncreasingRecords) {
 			checkRecord(line);
@@ -202,7 +203,7 @@ namespace SignalCaculator {
 
 			//time stamp for now:
 			string curTimeStamp = getTimeStampStr(line);
-			int curTSMilis = strToMillisecond(curTimeStamp);
+//			int curTSMilis = strToMillisecond(curTimeStamp);
 
 			//compute rb_bv_diff:
 			//computeBVDIFF(endPos, line, ofs, curTimeStamp);
@@ -240,7 +241,7 @@ namespace SignalCaculator {
 
 			double result = curDiff;
 			if (!acc.empty()) {
-				result += accSum / acc.size();
+				result += accSum / static_cast<double>(acc.size());
 			}
 
 			acc.push_back(make_pair(curTSMilis, curDiff));
